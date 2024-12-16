@@ -3,7 +3,7 @@
 USING_NS_CC;
 
 Hero* Hero::create()
-{// ¼ÓÔØÍ¼Æ¬µ½ SpriteFrameCache
+{// åŠ è½½å›¾ç‰‡åˆ° SpriteFrameCache
     SpriteFrameCache::getInstance()->addSpriteFrame(SpriteFrame::create("stand.png", Rect(0, 0, 64, 64)), "stand.png");
     Hero* hero = new (std::nothrow) Hero();
     if (hero && hero->initWithSpriteFrameName("stand.png"))
@@ -18,7 +18,7 @@ Hero* Hero::create()
 
 void Hero::createAnimation()
 {
-    // ¼ÓÔØÍ¼Æ¬µ½ SpriteFrameCache
+    // åŠ è½½å›¾ç‰‡åˆ° SpriteFrameCache
     SpriteFrameCache::getInstance()->addSpriteFrame(SpriteFrame::create("walk1.png", Rect(0, 0, 64, 64)), "walk1.png");
     SpriteFrameCache::getInstance()->addSpriteFrame(SpriteFrame::create("walk2.png", Rect(0, 0, 64, 64)), "walk2.png");
     SpriteFrameCache::getInstance()->addSpriteFrame(SpriteFrame::create("stand.png", Rect(0, 0, 64, 64)), "stand.png");
@@ -28,49 +28,49 @@ void Hero::createAnimation()
     SpriteFrameCache::getInstance()->addSpriteFrame(SpriteFrame::create("left1.png", Rect(0, 0, 64, 64)), "left1.png");
     SpriteFrameCache::getInstance()->addSpriteFrame(SpriteFrame::create("left2.png", Rect(0, 0, 64, 64)), "left2.png");
     SpriteFrameCache::getInstance()->addSpriteFrame(SpriteFrame::create("left3.png", Rect(0, 0, 64, 64)), "left3.png");
-    SpriteFrameCache::getInstance()->addSpriteFrame(SpriteFrame::create("back1.png", Rect(0, 0, 64, 64)), "back1.png");
+    SpriteFrameCache::getInstance()->addSpriteFrame(SpriteFrame::create("back1.png", Rect(0, 0, 64, 64)), "back.png");
     SpriteFrameCache::getInstance()->addSpriteFrame(SpriteFrame::create("back2.png", Rect(0, 0, 64, 64)), "back2.png");
     SpriteFrameCache::getInstance()->addSpriteFrame(SpriteFrame::create("back3.png", Rect(0, 0, 64, 64)), "back3.png");
 
-    // ´´½¨¶¯»­Ö¡
+    // åˆ›å»ºåŠ¨ç”»å¸§
     Vector<SpriteFrame*> walkFrames;
     walkFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("walk1.png"));
     walkFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("stand.png"));
     walkFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("walk2.png"));
 
-    // ´´½¨ĞĞ×ß¶¯»­
+    // åˆ›å»ºè¡Œèµ°åŠ¨ç”»
     cocos2d::Animation* walkAnimation = Animation::createWithSpriteFrames(walkFrames, 0.1f);
     AnimationCache::getInstance()->addAnimation(walkAnimation, "walk");
 
-    // ´´½¨ÏòÓÒ×ßµÄ¶¯»­Ö¡
+    // åˆ›å»ºå‘å³èµ°çš„åŠ¨ç”»å¸§
     Vector<SpriteFrame*> walkRightFrames;
     walkRightFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("right2.png"));
     walkRightFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("right1.png"));
     walkRightFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("right3.png"));
 
-    // ´´½¨ÏòÓÒ×ßµÄ¶¯»­
+    // åˆ›å»ºå‘å³èµ°çš„åŠ¨ç”»
     cocos2d::Animation* walkRightAnimation = Animation::createWithSpriteFrames(walkRightFrames, 0.1f);
     AnimationCache::getInstance()->addAnimation(walkRightAnimation, "walkRight");
     CCLOG("Walk right animation created successfully");
 
-    // ´´½¨Ïò×ó×ßµÄ¶¯»­Ö¡
+    // åˆ›å»ºå‘å·¦èµ°çš„åŠ¨ç”»å¸§
     Vector<SpriteFrame*> walkLeftFrames;
     walkLeftFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("left2.png"));
     walkLeftFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("left1.png"));
     walkLeftFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("left3.png"));
 
-    // ´´½¨Ïò×ó×ßµÄ¶¯»­
+    // åˆ›å»ºå‘å·¦èµ°çš„åŠ¨ç”»
     cocos2d::Animation* walkLeftAnimation = Animation::createWithSpriteFrames(walkLeftFrames, 0.1f);
     AnimationCache::getInstance()->addAnimation(walkLeftAnimation, "walkLeft");
     CCLOG("Walk left animation created successfully");
 
-    // ´´½¨Ïòºó×ßµÄ¶¯»­Ö¡
+    // åˆ›å»ºå‘åèµ°çš„åŠ¨ç”»å¸§
     Vector<SpriteFrame*> walkBackFrames;
     walkBackFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("back2.png"));
-    walkBackFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("back1.png"));
+    walkBackFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("back.png"));
     walkBackFrames.pushBack(SpriteFrameCache::getInstance()->getSpriteFrameByName("back3.png"));
 
-    // ´´½¨Ïòºó×ßµÄ¶¯»­
+    // åˆ›å»ºå‘åèµ°çš„åŠ¨ç”»
     cocos2d::Animation* walkBackAnimation = Animation::createWithSpriteFrames(walkBackFrames, 0.1f);
     AnimationCache::getInstance()->addAnimation(walkBackAnimation, "walkBack");
     CCLOG("Walk back animation created successfully");
@@ -116,7 +116,7 @@ void Hero::stopWalkAnimation(Direction direction)
         this->setSpriteFrame("left1.png");
         break;
     case Direction::UP:
-        this->setSpriteFrame("back1.png");
+        this->setSpriteFrame("back.png");
         break;
     default:
         this->setSpriteFrame("stand.png");
