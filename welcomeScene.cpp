@@ -80,6 +80,13 @@ bool WelcomeScene::init()
     // 添加点击事件监听器
     createButton->addClickEventListener([](Ref* sender) {
         auto mapScene = MapScene::createScene();
+        if (mapScene != nullptr) {
+            Director::getInstance()->replaceScene(TransitionFade::create(0.5, mapScene));
+        }
+        else {
+            CCLOG("Error: Failed to create MapScene");
+            // 处理错误，例如记录日志或创建默认场景
+        }
         Director::getInstance()->replaceScene(TransitionFade::create(0.5, mapScene));
         });
 
