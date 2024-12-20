@@ -1,6 +1,8 @@
 #include "MapScene.h"
 #include "Hero.h"
 #include "Crops.h"
+#include "Toolbar.h"
+#include "Tool.h"
 #include "ui/CocosGUI.h"
 
 USING_NS_CC;
@@ -11,7 +13,8 @@ Scene* MapScene::createScene()
     if (scene == nullptr)
     {
         CCLOG("Error: Failed to create MapScene");
-    }
+	}
+	
     return scene;
 }
 
@@ -19,6 +22,7 @@ bool MapScene::init()
 {
     if (!Scene::init())
     {
+        
         return false;
     }
 
@@ -33,14 +37,16 @@ bool MapScene::init()
         return false;
     }
 
+
     // 加载 Tiled 地图
     _map = TMXTiledMap::create(mapPath);
     if (_map == nullptr)
-    {;
+    {
         return false;
     }
     else
-    {
+	{
+		CCLOG("Map loaded successfully");
         _map->setAnchorPoint(Vec2(0, 0)); // 设置锚点为 (0, 0)
         _map->setPosition(Vec2(0, 0)); // 设置位置为 (0, 0)
         this->addChild(_map, 0, 0); // 确保地图的 z-order 为 0
@@ -48,15 +54,24 @@ bool MapScene::init()
 
     // 创建作物层
     _cropLayer = Node::create();
-    _map->addChild(_cropLayer, 1); // 将作物层添加到地图中，确保作物层的 z-order 为 1
+    if (_cropLayer != nullptr) {
+        _cropLayer->setAnchorPoint(Vec2(0, 0)); // 设置锚点为 (0, 0)
+
+        _cropLayer->setPosition(Vec2(0, 0)); // 设置位置为 (0, 0)
+        _map->addChild(_cropLayer, 1); // 将作物层添加到地图中，确保作物层的 z-order 为 1
+    }
+	else
+	{
+		CCLOG("Error: Failed to create crop layer");
+	}
 
     // 创建人物精灵
     _hero = Hero::create();
     if (_hero != nullptr)
     {
+        _hero->setAnchorPoint(Vec2(0.5, 0.5)); // 设置锚点为中心
         _hero->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
         this->addChild(_hero, 2, 1); // 确保人物的 z-order 为 2
-        CCLOG("Hero created and added to the scene");
     }
     else
     {
@@ -75,8 +90,18 @@ bool MapScene::init()
     // 调度更新方法
     this->schedule(CC_SCHEDULE_SELECTOR(MapScene::updateMapPosition), 0.01f);
 
-    // 创建工具栏
-    createToolbar();
+    // 创建工具栏并初始化成员变量
+    _toolbar = dynamic_cast<Toolbar*>(Toolbar::create());
+    if (_toolbar != nullptr)
+    {
+        this->addChild(_toolbar, 3); // 确保工具栏的 z-order 为 3
+    }
+    else
+    {
+        CCLOG("Error: Failed to create Toolbar");
+        return false;
+    }
+
 
     return true;
 }
@@ -159,55 +184,97 @@ void MapScene::addTouchListener()
 {
     auto listener = EventListenerTouchOneByOne::create();
     listener->onTouchBegan = [this](Touch* touch, Event* event) {
-        // 获取人物的世界坐标
-        Vec2 heroPosition = _hero->getPosition();
+        // 获取触摸点位置
+        Vec2 touchLocation = touch->getLocation();
 
-        // 将人物的世界坐标转换为地图坐标
-        Vec2 mapLocation = _map->convertToNodeSpace(heroPosition);
-
-        // 定义四个不同的偏移量
-        Vec2 offsetUp(-24, 20);    // 向上偏移
-        Vec2 offsetDown(-24, 5); // 向下偏移
-        Vec2 offsetLeft(-32, 13); // 向左偏移
-        Vec2 offsetRight(-16, 13); // 向右偏移
-
-        // 根据人物的当前方向选择相应的偏移量
-        Vec2 offset;
-        switch (_lastDirection)
+        // 检查触摸点是否在工具框范围内
+        bool isTouchOnToolbar = false;
+        for (const auto& child : _toolbar->getChildren())
         {
-        case Hero::Direction::UP:
-            offset = offsetUp;
-            break;
-        case Hero::Direction::DOWN:
-            offset = offsetDown;
-            break;
-        case Hero::Direction::LEFT:
-            offset = offsetLeft;
-            break;
-        case Hero::Direction::RIGHT:
-            offset = offsetRight;
-            break;
-        default:
-            offset = Vec2(0, 0); // 默认不偏移
-            break;
+            auto toolbarItem = dynamic_cast<Sprite*>(child);
+            if (toolbarItem)
+            {
+                Rect itemRect = toolbarItem->getBoundingBox();
+                if (itemRect.containsPoint(touchLocation))
+                {
+                    isTouchOnToolbar = true;
+                    break;
+                }
+            }
         }
 
-        // 调整作物的位置，使其种植在人物面向的方向
-        Vec2 cropPosition = mapLocation + offset;
-
-        // 创建并初始化作物对象
-        crop = Crops::create(Crops::CropType::pumpkin);
-       // crop->setContentSize(Size(20, -30)); // 设置内容大小
-        if (crop != nullptr)
+        // 如果触摸点在工具框范围内，则不进行操作
+        if (isTouchOnToolbar)
         {
-            // 设置作物位置为调整后的位置
-            crop->setPosition(cropPosition);
-			_cropLayer->addChild(crop);// 将作物添加到作物层
-            // 输出作物坐标和人物坐标
- //           CCLOG("Crop created and added to the scene at position (%f, %f)", cropPosition.x, cropPosition.y);
- //           CCLOG("Hero position at (%f, %f)", heroPosition.x, heroPosition.y);
+            log("Touch on toolbar");
+            return false;
         }
 
+        // 根据选中的工具框执行相应的操作
+        int selectedTool = _toolbar->getSelectedTool();
+        if (selectedTool == 0)
+        {
+            // 获取人物的世界坐标
+            Vec2 heroPosition = _hero->getPosition();
+
+            // 将人物的世界坐标转换为地图坐标
+            Vec2 mapLocation = _map->convertToNodeSpace(heroPosition);
+
+            // 定义四个不同的偏移量
+            Vec2 offsetUp(-15, 5);    // 向上偏移
+            Vec2 offsetDown(-15, -24); // 向下偏移
+            Vec2 offsetLeft(-32, -10); // 向左偏移
+            Vec2 offsetRight(0, -10); // 向右偏移
+
+            // 根据人物的当前方向选择相应的偏移量
+            Vec2 offset;
+            switch (_lastDirection)
+            {
+            case Hero::Direction::UP:
+                offset = offsetUp;
+                break;
+            case Hero::Direction::DOWN:
+                offset = offsetDown;
+                break;
+            case Hero::Direction::LEFT:
+                offset = offsetLeft;
+                break;
+            case Hero::Direction::RIGHT:
+                offset = offsetRight;
+                break;
+            default:
+                offset = Vec2(0, 0); // 默认不偏移
+                break;
+            }
+
+            // 调整作物的位置，使其种植在人物面向的方向
+            Vec2 cropPosition = mapLocation + offset;
+
+            // 创建并初始化作物对象
+            crop = Crops::create(Crops::CropType::pumpkin);
+
+            if (crop != nullptr)
+            {
+                crop->setAnchorPoint(Vec2(0.5, 0.5)); // 设置锚点为中心
+                // 设置作物位置为调整后的位置
+                crop->setPosition(cropPosition);
+                _cropLayer->addChild(crop);// 将作物添加到作物层
+                // 输出作物坐标和人物坐标
+                CCLOG("Crop created and added to the scene at position (%f, %f)", cropPosition.x, cropPosition.y);
+                //CCLOG("Hero position at (%f, %f)", heroPosition.x, heroPosition.y);
+            }
+        }
+		else if (selectedTool == 1)
+		{
+			// 创建工具对象
+			Tool* tool = Tool::create();
+			if (tool != nullptr)
+			{
+				// 收割人物周围的作物
+				tool->harvestCropsAroundHero(_hero, _cropLayer);
+			}
+		}
+       
         return true;
         };
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
@@ -326,38 +393,6 @@ void MapScene::updateMapPosition(float dt)
     else if (heroMoved)
     {
         _hero->setPosition(heroPosition);
-        
-    }
-}
 
-
-Vec2 MapScene::tileCoordForPosition(const Vec2& position)
-{
-    const auto mapSize = _map->getMapSize();
-    const auto tileSize = _map->getTileSize();
-    int x = position.x / tileSize.width;
-    int y = (mapSize.height - position.y / tileSize.height) / tileSize.height;
-    return Vec2(x, y);
-}
-
-void MapScene::createToolbar()
-{
-    const auto visibleSize = Director::getInstance()->getVisibleSize();
-    const float toolbarHeight = 25.0f; // 工具栏高度
-    const float toolbarWidth = 25.0f; // 工具栏宽度
-    const float spacing = 10.0f; // 工具栏项之间的间距
-
-    for (int i = 0; i < 6; ++i)
-    {
-
-        auto toolbarItem = Sprite::create("toolbar.png");
-        if (toolbarItem != nullptr)
-        {
-            toolbarItem->setScale(0.5f); // 调整工具栏项大小
-            float xPosition = (visibleSize.width - (6 * toolbarWidth + 5 * spacing)) / 2 + i * (toolbarWidth + spacing);
-            float yPosition = toolbarHeight / 2;
-            toolbarItem->setPosition(Vec2(xPosition, yPosition));
-            this->addChild(toolbarItem, 1); // 确保工具栏项的 z-order 为 1
-        }
     }
 }

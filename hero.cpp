@@ -100,7 +100,6 @@ void Hero::playWalkAnimation(Direction direction)
     {
         auto animate = Animate::create(animation);
         this->runAction(RepeatForever::create(animate));
-        CCLOG("Playing walk animation: %s", animationName.c_str());
     }
 }
 
@@ -122,7 +121,7 @@ void Hero::stopWalkAnimation(Direction direction)
         this->setSpriteFrame("stand.png");
         break;
     }
-    CCLOG("Stopped walk animation and set to stand frame");
+
 }
 
 void Hero::moveUp(float dt)
@@ -147,21 +146,4 @@ void Hero::moveRight(float dt)
 {
     this->setPositionX(this->getPositionX() + 50.0f * dt);
     CCLOG("Moved right");
-}
-
-bool Hero::checkCollisionWithNewPosition(const Vec2& newHeroPosition, Node* other)
-{
-    // 获取其他精灵的边界框
-    Rect otherRect = other->getBoundingBox();
-    CCLOG("Other bounding box: origin=(%f, %f), size=(%f, %f)", otherRect.origin.x, otherRect.origin.y, otherRect.size.width, otherRect.size.height);
-    CCLOG("New hero position: (%f, %f)", newHeroPosition.x, newHeroPosition.y);
-
-    // 检查新位置的点是否在其他精灵的边界框内
-    if (otherRect.containsPoint(newHeroPosition))
-    {
-        CCLOG("Collision detected between new hero position and other sprite at position (%f, %f)", other->getPosition().x, other->getPosition().y);
-        return true; // 检测到碰撞，返回 true
-    }
-    CCLOG("No collision detected");
-    return false; // 未检测到碰撞，返回 false
 }

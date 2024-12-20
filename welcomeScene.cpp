@@ -20,6 +20,7 @@ bool WelcomeScene::init()
     const auto visibleSize = Director::getInstance()->getVisibleSize();
     const Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+   
     // 创建一个精灵作为背景
     auto background = Sprite::create("sky.jpg");
     if (background == nullptr)
@@ -40,8 +41,8 @@ bool WelcomeScene::init()
         // 设置背景精灵的缩放比例
         background->setScale(scale);
 
-        // 设置背景精灵的位置为屏幕中心
-        background->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
+        // 设置背景精灵的锚点和位置为屏幕中心
+        background->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
         this->addChild(background, 0);
     }
 

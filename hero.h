@@ -22,7 +22,6 @@ public:
     void moveDown(float dt);
     void moveLeft(float dt);
     void moveRight(float dt);
-    bool checkCollisionWithNewPosition(const cocos2d::Vec2& newHeroPosition, cocos2d::Node* other);
 };
 
 #endif // __HERO_H__
